@@ -1,0 +1,23 @@
+{
+  "name": "conference_app_events",
+  "version": "1.0.0",
+  "description": "first microservices project - events microservice",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/squillen/conference_app_events.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/squillen/conference_app_events/issues"
+  },
+  "homepage": "https://github.com/squillen/conference_app_events#readme",
+  "dependencies": {
+    "amqplib": "^0.6.0"
+  }
+}
