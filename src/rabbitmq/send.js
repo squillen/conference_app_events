@@ -1,6 +1,6 @@
 // code leveraged from https://www.cloudamqp.com/blog/2015-05-19-part2-2-rabbitmq-for-beginners_example-and-sample-code-node-js.html
-var amqp = require('amqplib/callback_api')
-var amqpConn = null
+const amqp = require('amqplib/callback_api')
+let amqpConn = null
 
 function connect () {
   amqp.connect('amqp://localhost', function (err, conn) {
@@ -30,8 +30,8 @@ function whenConnected () {
   startWorker()
 }
 
-var pubChannel = null
-var offlinePubQueue = []
+let pubChannel = null
+const offlinePubQueue = []
 function startPublisher () {
   amqpConn.createConfirmChannel(function (err, ch) {
     if (closeOnErr(err)) return
@@ -44,7 +44,7 @@ function startPublisher () {
 
     pubChannel = ch
     while (true) {
-      var m = offlinePubQueue.shift()
+      const m = offlinePubQueue.shift()
       if (!m) break
       publish(m[0], m[1], m[2])
     }
@@ -81,7 +81,7 @@ function startWorker () {
       console.log('::: AMQP ERROR ::: channel closed')
     })
     ch.prefetch(10)
-    const queue = 'event'
+    const queue = 'event.create' // change to location?
     ch.assertQueue(queue, { durable: true }, function (err, res) {
       if (closeOnErr(err)) return
       ch.consume(queue, processMsg, { noAck: false })
