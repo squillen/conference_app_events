@@ -1,14 +1,19 @@
 const EventsDAO = require('../../db/dao/eventsDAO');
+import { sendEventNotification } from '../utils/requests'
 
 class Event {
   constructor({ name, location, sponsors } = {}) {
     this.name = name;
     this.location = location;
-    this.sponsors = sponsors;
+    this.sponsors = sponsors
   }
 
   toJson() {
-    return { name: this.name, sponsors: this.sponsors };
+    return {
+      name: this.name,
+      location: this.location, 
+      sponsors: this.sponsors 
+    };
   }
 }
 
@@ -47,6 +52,7 @@ module.exports = class EventController {
       }
 
       const event = new Event(savedEvent);
+      sendEventNotification(event, 'eventCreated')
       return res.json({ success: { event: event.toJson() } });
     } catch (e) {
       res.status(500).json({ error: e });
@@ -92,9 +98,33 @@ module.exports = class EventController {
     try {
       const { name, update } = req.body;
       const updatedEvent = await EventsDAO.findAndUpdateEvent(name, update);
+      sendEventNotification(updatedEvent, 'eventUpdated')
       return res.json({ success: updatedEvent });
     } catch (error) {
       console.error('findAndUpdateEvent error ::: ', error);
+      return res.json({ error });
+    }
+  }
+
+  static async updateEventSponsors(req, res) {
+    try {
+      const { name, update } = req.body;
+      const updatedEvent = await EventsDAO.updateEventSponsors(name, update);
+      return res.json({ success: updatedEvent });
+    } catch (error) {
+      console.error('findAndUpdateEvent error ::: ', error);
+      return res.json({ error });
+    }
+  }
+
+  static async findExpectedEventRevenue(req, res) {
+    try {
+      const { name } = req.body;
+      const event = await EventsDAO.findEventByName(name);
+      // calculate event details...or should this already be a precalculated field?
+      return res.json({ success: event });
+    } catch (error) {
+      console.error('findExpectedEventRevenue error ::: ', error);
       return res.json({ error });
     }
   }

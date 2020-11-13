@@ -35,6 +35,18 @@ module.exports = class EventsDAO {
     }
   }
 
+  static async updateEventSponsors(name, sponsors) {
+    try {
+      return await events.updateOne(
+        { name },
+        { $set: sponsors },
+      );
+    } catch (e) {
+      console.error('Error in updateEventSponsors()', e);
+      return null;
+    }
+  }
+
   static async findEventByID(id) {
     const _id = ObjectId(id);
     try {
