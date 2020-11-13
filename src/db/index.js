@@ -1,7 +1,8 @@
+require('dotenv').config()
 const { MongoClient } = require('mongodb');
 const app = require('../server/index');
 const EventsDAO = require('./dao/eventsDAO');
-const mongoURI = process.env.DB_URI || 'mongodb://localhost:27017/example-dev';
+const mongoURI = process.env.DB_URI || 'mongodb://localhost:27017/events-dev';
 const port = process.env.PORT || 8080;
 
 const client = new MongoClient(mongoURI, {
