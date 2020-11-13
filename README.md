@@ -4,15 +4,15 @@
 ### NOTE: this is not yet complete
 
 # TO USE
-1. npm install
-2. Create a .env file in the root of your project with the following contents:
+1. ```npm install```
+2. Create a ```.env``` file in the root of your project with the following contents:
 ```
   DB_URI=mongodb+srv://admin:hr-microservices-events@events-microservice.tb5qj.mongodb.net/test?retryWrites=true&w=majority
   DB_NAME=development
   PORT=8080
 ```
 
-3. run ```npm run dev```
+3. ```npm run dev```
 
 
 # CRUD
