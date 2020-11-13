@@ -16,10 +16,11 @@ module.exports = class EventsDAO {
 
   static async createNewEvent(eventInfo) {
     try {
-      return await events.insertOne(eventInfo, { writeConcern: 2 });
-    } catch (e) {
-      console.error(e);
-      return null;
+      const success = await events.insertOne(eventInfo, { writeConcern: 2 });
+      return { success }
+    } catch (error) {
+      console.error(error);
+      return { error };
     }
   }
 
@@ -66,9 +67,10 @@ module.exports = class EventsDAO {
     }
   }
 
-  static async findNearestEvents(location = '') {
+  static async findNearestEvents(location) {
     try {
-      const query = { }
+      const [longitude, latitude] = location
+      const query = { $near: { $geometry: { type: 'Point', coordinates: [longitude, latitude]} } }
       const cursor = await events.find(query);
       return await cursor.toArray();
     } catch (e) {

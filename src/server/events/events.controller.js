@@ -1,18 +1,18 @@
 const EventsDAO = require('../../db/dao/eventsDAO');
-import { sendEventNotification } from '../utils/requests'
+const { sendEventNotification } = require('../utils/requests');
 
 class Event {
   constructor({ name, location, sponsors } = {}) {
     this.name = name;
     this.location = location;
-    this.sponsors = sponsors
+    this.sponsors = sponsors;
   }
 
   toJson() {
     return {
       name: this.name,
       location: this.location, 
-      sponsors: this.sponsors 
+      sponsors: this.sponsors,
     };
   }
 }
@@ -33,7 +33,7 @@ module.exports = class EventController {
 
       const eventAlreadyExists = await EventsDAO.findEventByName(name);
       if (eventAlreadyExists) {
-        errors.duplicate = 'Event already exists';
+        errors.duplicateEvent = 'An event by that name already exists';
         res.status(400).json(errors);
         return;
       }
@@ -41,7 +41,7 @@ module.exports = class EventController {
       const eventInfo = { ...req.body };
 
       const insertResult = await EventsDAO.createNewEvent(eventInfo);
-      if (!insertResult.success) errors.creationError = insertResult.error;
+      if (insertResult.error) errors.creationError = insertResult.error;
 
       const savedEvent = await EventsDAO.findEventByName(name);
       if (!savedEvent) errors.general = 'Internal error, please try again later';
@@ -50,11 +50,11 @@ module.exports = class EventController {
         res.status(400).json(errors);
         return;
       }
-
       const event = new Event(savedEvent);
       sendEventNotification(event, 'eventCreated')
       return res.json({ success: { event: event.toJson() } });
     } catch (e) {
+      console.log('inside error :>> ');
       res.status(500).json({ error: e });
     }
   }
@@ -85,7 +85,7 @@ module.exports = class EventController {
 
   static async findNearestEvents(req, res) {
     try {
-      const { location } = req.body;
+      const { location = {} } = req.body;
       const response = await EventsDAO.findNearestEvents(location);
       return res.json({ success: response });
     } catch (error) {
@@ -108,8 +108,8 @@ module.exports = class EventController {
 
   static async updateEventSponsors(req, res) {
     try {
-      const { name, update } = req.body;
-      const updatedEvent = await EventsDAO.updateEventSponsors(name, update);
+      const { name, sponsors } = req.body;
+      const updatedEvent = await EventsDAO.updateEventSponsors(name, sponsors);
       return res.json({ success: updatedEvent });
     } catch (error) {
       console.error('findAndUpdateEvent error ::: ', error);
