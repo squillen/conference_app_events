@@ -1,9 +1,9 @@
 require('dotenv').config()
-const { MongoClient } = require('mongodb');
-const app = require('../server/index');
-const EventsDAO = require('./dao/eventsDAO');
-const mongoURI = process.env.DB_URI || 'mongodb://localhost:27017/events-dev';
-const port = process.env.PORT || 8080;
+const { MongoClient } = require('mongodb')
+const app = require('../server/index')
+const EventsDAO = require('./dao/eventsDAO')
+const mongoURI = process.env.DB_URI || 'mongodb://localhost:27017/events-dev'
+const port = process.env.PORT || 8080
 
 const client = new MongoClient(mongoURI, {
   useNewUrlParser: true,
@@ -11,22 +11,22 @@ const client = new MongoClient(mongoURI, {
   poolSize: 50,
   connectTimeoutMS: 3000,
   keepAlive: 1,
-});
+})
 
-async function connectToMongoDB() {
+async function connectToMongoDB () {
   try {
-    await client.connect();
+    await client.connect()
     const connections = [
       EventsDAO.injectDB(client),
-    ];
-    await Promise.all(connections);
+    ]
+    await Promise.all(connections)
     console.info('::: Successfully connected to MongoDB :::')
     app.listen(port, () => {
       console.info(`::: SERVER STARTED! Listening on port ${port} :::`)
-    });
+    })
   } catch (e) {
-    console.error('::: UNABLE TO CONNECT :::', e);
+    console.error('::: UNABLE TO CONNECT :::', e)
   }
 }
 
-connectToMongoDB();
+connectToMongoDB()

@@ -1,131 +1,131 @@
-const EventsDAO = require('../../db/dao/eventsDAO');
-const { sendEventNotification } = require('../utils/requests');
+const EventsDAO = require('../../db/dao/eventsDAO')
+const { sendEventNotification } = require('../utils/requests')
 
 class Event {
-  constructor({ name, location, sponsors } = {}) {
-    this.name = name;
-    this.location = location;
-    this.sponsors = sponsors;
+  constructor ({ name, location, sponsors } = {}) {
+    this.name = name
+    this.location = location
+    this.sponsors = sponsors
   }
 
-  toJson() {
+  toJson () {
     return {
       name: this.name,
-      location: this.location, 
+      location: this.location,
       sponsors: this.sponsors,
-    };
+    }
   }
 }
 
 module.exports = class EventController {
-  static async createNewEvent(req, res) {
+  static async createNewEvent (req, res) {
     try {
-      const { name, location } = req.body;
-      const errors = {};
+      const { name, location } = req.body
+      const errors = {}
 
-      if (!location) errors.missingLocation = 'Events must have a location';
-      if (!name) errors.missingName = 'Events must have a name';
+      if (!location) errors.missingLocation = 'Events must have a location'
+      if (!name) errors.missingName = 'Events must have a name'
 
       if (Object.keys(errors).length > 0) {
-        res.status(400).json(errors);
-        return;
+        res.status(400).json(errors)
+        return
       }
 
-      const eventAlreadyExists = await EventsDAO.findEventByName(name);
+      const eventAlreadyExists = await EventsDAO.findEventByName(name)
       if (eventAlreadyExists) {
-        errors.duplicateEvent = 'An event by that name already exists';
-        res.status(400).json(errors);
-        return;
+        errors.duplicateEvent = 'An event by that name already exists'
+        res.status(400).json(errors)
+        return
       }
 
-      const eventInfo = { ...req.body };
+      const eventInfo = { ...req.body }
 
-      const insertResult = await EventsDAO.createNewEvent(eventInfo);
-      if (insertResult.error) errors.creationError = insertResult.error;
+      const insertResult = await EventsDAO.createNewEvent(eventInfo)
+      if (insertResult.error) errors.creationError = insertResult.error
 
-      const savedEvent = await EventsDAO.findEventByName(name);
-      if (!savedEvent) errors.general = 'Internal error, please try again later';
+      const savedEvent = await EventsDAO.findEventByName(name)
+      if (!savedEvent) errors.general = 'Internal error, please try again later'
 
       if (Object.keys(errors).length > 0) {
-        res.status(400).json(errors);
-        return;
+        res.status(400).json(errors)
+        return
       }
-      const event = new Event(savedEvent);
+      const event = new Event(savedEvent)
       sendEventNotification(event, 'eventCreated')
-      return res.json({ success: { event: event.toJson() } });
+      return res.json({ success: { event: event.toJson() } })
     } catch (e) {
-      console.log('inside error :>> ');
-      res.status(500).json({ error: e });
+      console.log('inside error :>> ')
+      res.status(500).json({ error: e })
     }
   }
 
-  static async findEventByID(req, res) {
+  static async findEventByID (req, res) {
     try {
-      const { id } = req.body;
-      const event = await EventsDAO.findEventByID(id);
+      const { id } = req.body
+      const event = await EventsDAO.findEventByID(id)
       if (event.name) return res.json({ success: event })
-      res.json({ error: 'unable to find event' });
+      res.json({ error: 'unable to find event' })
     } catch (error) {
-      console.error('findEventByID error ::: ', error);
-      res.json({ error });
+      console.error('findEventByID error ::: ', error)
+      res.json({ error })
     }
   }
 
-  static async findEventByName(req, res) {
+  static async findEventByName (req, res) {
     try {
-      const { name } = req.body;
-      const event = await EventsDAO.findEventByName(name);
+      const { name } = req.body
+      const event = await EventsDAO.findEventByName(name)
       if (event.name) return res.json({ success: event })
-      res.json({ error: 'unable to find event' });
+      res.json({ error: 'unable to find event' })
     } catch (error) {
-      console.error('findEventByName error ::: ', error);
-      res.json({ error });
+      console.error('findEventByName error ::: ', error)
+      res.json({ error })
     }
   }
 
-  static async findNearestEvents(req, res) {
+  static async findNearestEvents (req, res) {
     try {
-      const { location = {} } = req.body;
-      const response = await EventsDAO.findNearestEvents(location);
-      return res.json({ success: response });
+      const { location = {} } = req.body
+      const response = await EventsDAO.findNearestEvents(location)
+      return res.json({ success: response })
     } catch (error) {
-      console.error('findEventByID error ::: ', error);
-      res.json({ error });
+      console.error('findEventByID error ::: ', error)
+      res.json({ error })
     }
   }
 
-  static async findAndUpdateEvent(req, res) {
+  static async findAndUpdateEvent (req, res) {
     try {
-      const { name, update } = req.body;
-      const updatedEvent = await EventsDAO.findAndUpdateEvent(name, update);
+      const { name, update } = req.body
+      const updatedEvent = await EventsDAO.findAndUpdateEvent(name, update)
       sendEventNotification(updatedEvent, 'eventUpdated')
-      return res.json({ success: updatedEvent });
+      return res.json({ success: updatedEvent })
     } catch (error) {
-      console.error('findAndUpdateEvent error ::: ', error);
-      return res.json({ error });
+      console.error('findAndUpdateEvent error ::: ', error)
+      return res.json({ error })
     }
   }
 
-  static async updateEventSponsors(req, res) {
+  static async updateEventSponsors (req, res) {
     try {
-      const { name, sponsors } = req.body;
-      const updatedEvent = await EventsDAO.updateEventSponsors(name, sponsors);
-      return res.json({ success: updatedEvent });
+      const { name, sponsors } = req.body
+      const updatedEvent = await EventsDAO.updateEventSponsors(name, sponsors)
+      return res.json({ success: updatedEvent })
     } catch (error) {
-      console.error('findAndUpdateEvent error ::: ', error);
-      return res.json({ error });
+      console.error('findAndUpdateEvent error ::: ', error)
+      return res.json({ error })
     }
   }
 
-  static async findExpectedEventRevenue(req, res) {
+  static async findExpectedEventRevenue (req, res) {
     try {
-      const { name } = req.body;
-      const event = await EventsDAO.findEventByName(name);
+      const { name } = req.body
+      const event = await EventsDAO.findEventByName(name)
       // calculate event details...or should this already be a precalculated field?
-      return res.json({ success: event });
+      return res.json({ success: event })
     } catch (error) {
-      console.error('findExpectedEventRevenue error ::: ', error);
-      return res.json({ error });
+      console.error('findExpectedEventRevenue error ::: ', error)
+      return res.json({ error })
     }
   }
-};
+}

@@ -1,9 +1,9 @@
-const { Router } = require('express');
-const notificationsCtrl = require('./notifications.controller.js');
+const { Router } = require('express')
+const notificationsCtrl = require('./notifications.controller.js')
 
-const router = new Router();
+const router = new Router()
 
-router.route('/eventCreated').post(notificationsCtrl.eventCreated);
-router.route('/eventUpdated').post(notificationsCtrl.eventUpdated);
+router.route('/eventCreated').post(notificationsCtrl.eventCreated)
+router.route('/eventUpdated').post(notificationsCtrl.eventUpdated)
 
-module.exports = router;
+module.exports = router
