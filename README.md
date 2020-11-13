@@ -1,5 +1,43 @@
 # conference_app_events
 
+
+### NOTE: this is not yet complete
+
+# TO USE
+1. npm install
+2. Create a .env file in the root of your project with the following contents:
+```
+  DB_URI=mongodb+srv://admin:hr-microservices-events@events-microservice.tb5qj.mongodb.net/test?retryWrites=true&w=majority
+  DB_NAME=development
+  PORT=8080
+```
+
+3. run ```npm run dev```
+
+
+# CRUD
+1. To create, POST request to /event/create with a body that contains at least the following:
+
+    ```{ location: { latitude, longitude }, name: "eventName" }```
+
+1. To update an event, PATCH request to /event/update (not yet working) with a body that contains:
+
+    ```{ name: "eventName", update: {} }```
+
+2. To update an event's sponsors, PATCH request to /event/updateSponsors (not yet working) with the following body:
+
+    ```{ name: "eventName", sponsors: ["Platinum", "Gold", "Silver"] }```
+
+3. To get expected revenue, GET request to /event/expectedRevenue (not yet working) with the following body:
+
+    ```{ name: "eventName" }```
+
+4. To see 10 closest events, POST request to /event/findNearest (not yet working) with the following body:
+
+    ```{ location: { latitude, longitude } }```
+
+
+# PROMPT
 Events
 Depends on: Locations
 This must provide HTTP RESTful APIs to achieve the following:
