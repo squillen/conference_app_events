@@ -8,15 +8,15 @@ module.exports = class EventsDAO {
       const dbName = process.env.DB_NAME || 'development';
       events = await conn.db(dbName).collection('events');
       events.createIndex({ eventDate: 1 });
-      console.info('EventsDAO connected');
+      console.info('::: EventsDAO connected :::');
     } catch (e) {
       console.error(`Unable to establish collection connections in EventsDAO: ${e}`);
     }
   }
 
-  static async createNewEvent(info) {
+  static async createNewEvent(eventInfo) {
     try {
-      return await events.insertOne(info, { writeConcern: 2 });
+      return await events.insertOne(eventInfo, { writeConcern: 2 });
     } catch (e) {
       console.error(e);
       return null;
