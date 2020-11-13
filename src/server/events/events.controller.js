@@ -15,12 +15,20 @@ class Event {
 module.exports = class EventController {
   static async createNewEvent(req, res) {
     try {
-      const { name } = req.body;
+      const { name, location } = req.body;
       const errors = {};
+
+      if (!location) errors.missingLocation = 'Events must have a location';
+      if (!name) errors.missingName = 'Events must have a name';
+
+      if (Object.keys(errors).length > 0) {
+        res.status(400).json(errors);
+        return;
+      }
 
       const eventAlreadyExists = await EventsDAO.findEventByName(name);
       if (eventAlreadyExists) {
-        errors.duplication = 'Event already exists';
+        errors.duplicate = 'Event already exists';
         res.status(400).json(errors);
         return;
       }
@@ -28,14 +36,10 @@ module.exports = class EventController {
       const eventInfo = { ...req.body };
 
       const insertResult = await EventsDAO.createNewEvent(eventInfo);
-      if (!insertResult.success) {
-        errors.creationError = insertResult.error;
-      }
+      if (!insertResult.success) errors.creationError = insertResult.error;
 
       const savedEvent = await EventsDAO.findEventByName(name);
-      if (!savedEvent) {
-        errors.general = 'Internal error, please try again later';
-      }
+      if (!savedEvent) errors.general = 'Internal error, please try again later';
 
       if (Object.keys(errors).length > 0) {
         res.status(400).json(errors);
