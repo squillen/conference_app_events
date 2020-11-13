@@ -6,7 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/db/index.js",
-    "dev": "nodemon src/db/index.js --watch server --watch"
+    "db": "nodemon src/db/index.js --watch server --watch",
+    "rabbitSend": "nodemon src/rabbitmq/send",
+    "rabbitReceive": "nodemon src/rabbitmq/receive",
+    "dev": "concurrently \"npm run db\" \"npm run rabbitSend\" \"npm run rabbitReceive\""
   },
   "repository": {
     "type": "git",
@@ -27,6 +30,7 @@
     "mongodb": "^3.6.3"
   },
   "devDependencies": {
+    "concurrently": "^5.3.0",
     "nodemon": "^2.0.6"
   }
 }

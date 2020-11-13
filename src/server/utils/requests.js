@@ -1,8 +1,16 @@
-import { handleInternalRequest, getOptions } from './helpers'
+const { handleInternalRequest, getOptions } = require('./helpers')
 
-export function sendEventNotification(event, type) {
-  const path = `/api/notifications/${type}`;
-  const options = getOptions('post');
-  options.body = { event }
-  return handleInternalRequest(path, options);
+async function sendEventNotification(event, type) {
+  try {
+    const path = `/api/notifications/${type}`;
+    const options = getOptions('post');
+    options.body = { event }
+    console.log('path :>> ', path);
+    const result = await handleInternalRequest(path, options);
+    console.log('result :>> ', result);
+  } catch (e) {
+    console.error(e)
+  }
 }
+
+module.exports = { sendEventNotification }

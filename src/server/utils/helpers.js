@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-export function getOptions(method = 'get') {
+function getOptions(method = 'get') {
   return {
     headers: {
       'Content-Type': 'application/json',
@@ -11,8 +11,8 @@ export function getOptions(method = 'get') {
   };
 }
 
-export async function callAPI(path, options) {
-  const host = window.location.origin
+async function callAPI(path, options) {
+  const host = 'http://localhost:8080'
   const url = host + path;
   const method = options.method.toLowerCase() || 'get';
   try {
@@ -28,8 +28,10 @@ export async function callAPI(path, options) {
   }
 }
 
-export function handleInternalRequest(path, options) {
+function handleInternalRequest(path, options) {
   return callAPI(path, options)
     .then(response => response.success || response.error || response)
     .catch(err => new Error(err));
 }
+
+module.exports = { getOptions, handleInternalRequest }
