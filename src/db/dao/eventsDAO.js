@@ -24,11 +24,12 @@ module.exports = class EventsDAO {
     }
   }
 
-  static async findAndUpdateEvent (name, update) {
+  static async findAndUpdateEvent (id, update) {
     try {
+      const _id = ObjectId(id)
       return await events.updateOne(
-        { name },
-        update,
+        { _id },
+        { $set: update },
       )
     } catch (e) {
       console.error('Error in findAndUpdateEvent()', e)

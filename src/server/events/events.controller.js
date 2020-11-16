@@ -21,7 +21,7 @@ class Event {
   }
 }
 
-function formatEventDate (date) {
+function formatEventDate (date = '') {
   const [month, day, year] = date.split('/')
   let dateYear = year
   if (year && year.length === 2) dateYear = `20${year}`
@@ -61,12 +61,15 @@ async function calculateExpectedRevenue (event = {}) {
 
   // handle general admission
   const generalAttendance = Number(maxRoomsOccupancy) - freeBadges
-  const error = `
-    This location can only allow for ${maxRoomsOccupancy} and you are currently
+
+  if (generalAttendance < 0 && generalAttendance !== 0) {
+    const error = `
+    This location can only allow for ${maxRoomsOccupancy} maximum occupants and you are currently
     giving away ${freeBadges} free badges, thus there is no more room for general admissions.
     Please reconfigure
   `
-  if (generalAttendance < 0) return { error }
+    return { error }
+  }
   expectedRevenue += generalAttendance * attendanceCost
 
   if (expectedRevenue < 0) {
@@ -76,19 +79,28 @@ async function calculateExpectedRevenue (event = {}) {
   return { expectedRevenue, generalAttendance }
 }
 
-async function validateInput (event) {
-  const { eventDate, locationID, name, sponsors, presentations, vendors } = event
+async function validateInput (event, updating) {
+  const {
+    eventDate = '',
+    locationID = '',
+    name = '',
+    sponsors = [],
+    presentations = {},
+    vendors = {},
+  } = event
   const errors = {}
 
   // NAME CHECKS
   if (!name) errors.missingName = 'Events must have a name'
   else {
-    // confirm event does not already exist
-    try {
-      const eventAlreadyExists = await EventsDAO.findEventByName(name)
-      if (eventAlreadyExists) errors.duplicateEvent = 'An event by that name already exists'
-    } catch (e) {
-      console.error(e)
+    if (!updating) {
+      // confirm event does not already exist
+      try {
+        const eventAlreadyExists = await EventsDAO.findEventByName(name)
+        if (eventAlreadyExists) errors.duplicateEvent = 'An event by that name already exists'
+      } catch (e) {
+        console.error(e)
+      }
     }
   }
 
@@ -131,12 +143,14 @@ async function validateInput (event) {
   if (error) errors.expectedRevenue = error
 
   // DATE CHECKS
-  if (!eventDate) errors.missingEventDate = 'Events must have a date in the format MM/DD/YYYY'
-  else {
-    const year = eventDate.split('/')[2]
+  const eventDateString = eventDate.toString()
+  console.log("eventDateString.toString().split('T').length :>> ", eventDateString.toString().split('T').length);
+  if (!eventDateString) errors.missingEventDate = 'Events must have a date in the format MM/DD/YYYY'
+  else if (eventDateString && eventDateString.split('T') && eventDateString.toString().split('T').length < 2) {
+    const year = eventDateString.split('/')[2]
     if (!year) errors.wrongDateFormat = 'Event dates must be formatted like MM/DD/YYYY'
     else {
-      const formattedDate = formatEventDate(eventDate)
+      const formattedDate = formatEventDate(eventDateString)
       const dateIsInThePast = formattedDate < new Date()
       if (dateIsInThePast) errors.eventDateError = 'Event date must be in the future'
     }
@@ -224,10 +238,25 @@ module.exports = class EventController {
 
   static async findAndUpdateEvent (req, res) {
     try {
-      const { name, update } = req.body
-      const updatedEvent = await EventsDAO.findAndUpdateEvent(name, update)
-      sendEventNotification(updatedEvent, 'eventUpdated')
-      return res.json({ success: updatedEvent })
+      const { id } = req.params
+      const { update } = req.body
+      const currentEvent = await EventsDAO.findEventByID(id)
+      const checkEvent = { ...currentEvent, ...update }
+      const { errors, generalAttendance } = await validateInput(checkEvent, true)
+      if (Object.keys(errors).length > 0) {
+        res.status(400).json(errors)
+        return
+      }
+
+      // passed all tests, make into event
+      if (update.eventDate) {
+        const eventDate = formatEventDate(update.eventDate)
+        update.eventDate = eventDate
+      }
+      await EventsDAO.findAndUpdateEvent(id, { ...update, generalAttendance })
+      const event = await EventsDAO.findEventByID(id)
+      sendEventNotification(event, 'eventUpdated')
+      return res.json({ success: event })
     } catch (error) {
       console.error('findAndUpdateEvent error ::: ', error)
       return res.json({ error })
