@@ -2,7 +2,7 @@
 const amqp = require('amqplib/callback_api')
 let amqpConn = null
 
-function connect () {
+function connect (queue) {
   amqp.connect('amqp://localhost', function (err, conn) {
     if (err) {
       console.error('::: AMQP ERROR :::', err.message)
@@ -21,13 +21,13 @@ function connect () {
     console.log('::: AMQP CONNECTED! :::')
     amqpConn = conn
 
-    whenConnected()
+    whenConnected(queue)
   })
 }
 
-function whenConnected () {
+function whenConnected (queue) {
   startPublisher()
-  startWorker()
+  startWorker(queue)
 }
 
 let pubChannel = null
@@ -71,7 +71,7 @@ function publish (exchange, routingKey, content) {
 }
 
 // A worker that acknowledges messages only if processed successfully
-function startWorker () {
+function startWorker (queue) {
   amqpConn.createChannel(function (err, ch) {
     if (closeOnErr(err)) return
     ch.on('error', function (err) {
@@ -81,7 +81,6 @@ function startWorker () {
       console.log('::: AMQP ERROR ::: channel closed')
     })
     ch.prefetch(10)
-    const queue = 'event.create' // change to location?
     ch.assertQueue(queue, { durable: true }, function (err, res) {
       if (closeOnErr(err)) return
       ch.consume(queue, processMsg, { noAck: false })
@@ -113,10 +112,11 @@ function closeOnErr (err) {
   return true
 }
 
-function publishMessage (message, routingKey = 'events') {
+function publishMessage (message, routingKey = 'event.create') {
   publish('', routingKey, Buffer.from(message))
 }
 
-connect()
+connect('event.create')
+connect('event.modify')
 
 module.exports = { publishMessage }

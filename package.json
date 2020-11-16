@@ -8,8 +8,7 @@
     "start": "node src/db/index.js",
     "db": "nodemon src/db/index.js --watch server --watch",
     "rabbitSend": "nodemon src/rabbitmq/send",
-    "rabbitReceive": "nodemon src/rabbitmq/receive",
-    "dev": "concurrently \"npm run db\" \"npm run rabbitSend\" \"npm run rabbitReceive\""
+    "dev": "concurrently \"npm run db\" \"npm run rabbitSend\""
   },
   "repository": {
     "type": "git",
