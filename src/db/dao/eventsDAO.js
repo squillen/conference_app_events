@@ -38,10 +38,11 @@ module.exports = class EventsDAO {
 
   static async updateEventSponsors (name, sponsors) {
     try {
-      return await events.updateOne(
+      await events.updateOne(
         { name },
-        { $set: sponsors },
+        { $set: { sponsors } },
       )
+      return await events.findOne({ name })
     } catch (e) {
       console.error('Error in updateEventSponsors()', e)
       return null
@@ -67,11 +68,9 @@ module.exports = class EventsDAO {
     }
   }
 
-  static async findNearestEvents (location) {
+  static async findNearestEvents () {
     try {
-      const [longitude, latitude] = location
-      const query = { $near: { $geometry: { type: 'Point', coordinates: [longitude, latitude] } } }
-      const cursor = await events.find(query)
+      const cursor = await events.find().limit(10).sort({ eventDate: 1 })
       return await cursor.toArray()
     } catch (e) {
       console.error(e)
