@@ -1,8 +1,6 @@
 # conference_app_events
 
 
-### NOTE: this is not yet complete
-
 # TO USE
 1. ```npm install```
 2. Create a ```.env``` file in the root of your project with the following contents:
@@ -16,25 +14,71 @@
 
 
 # CRUD
-1. To create, POST request to /event/create with a body that contains at least the following:
 
-    ```{ location: { latitude, longitude }, name: "eventName" }```
+## CREATE
+1. **To *create* an event**, *POST* request to */event/create*. Example body:
 
-1. To update an event, PATCH request to /event/update (not yet working) with a body that contains:
+    ```
+        {
+            "name": "Super Awesome Event",
+            "eventDate": "12/15/2022",
+            "sponsors": [
+                {
+                    "name": "Platinum",
+                    "cost": 14500,
+                    "freeBadges": 10
+                },
+                {
+                    "name": "Gold",
+                    "cost": 9000,
+                    "freeBadges": 7
+                },
+                {
+                    "name": "Bronze",
+                    "cost": 4500,
+                    "freeBadges": 5
+                }
+            ],
+            "locationID": "50e4d444-0039-4446-aa38-a7dab34d7ca2",
+            "attendanceCost": 300,
+            "vendors": {
+                "availableBooths": 16,
+                "boothCost": 2000
+            }
+        }
+    ```
 
-    ```{ name: "eventName", update: {} }```
+## UPDATE SPONSORS
+2. **To *update* an event's sponsors**, *PATCH* request to */event/updateSponsors*. Example body:
 
-2. To update an event's sponsors, PATCH request to /event/updateSponsors (not yet working) with the following body:
+```
+    {
+        "name": "Super Awesome Event",
+        "sponsors": [
+            {
+                "name": "Platinum",
+                "cost": 15000,
+                "freeBadges": 15
+            },
+            {
+                "name": "Gold",
+                "cost": 10,
+                "freeBadges": 15
+            },
+            {
+                "name": "Bronze",
+                "cost": 4500,
+                "freeBadges": 5
+            }
+        ]
+    }
+```
 
-    ```{ name: "eventName", sponsors: ["Platinum", "Gold", "Silver"] }```
+## GET EXPECTED EVENT REVENUE
+3. **To get expected revenue for a particular event**, *GET* request to */event/expectedRevenue/:id*, where :id is the event's unique id
 
-3. To get expected revenue, GET request to /event/expectedRevenue (not yet working) with the following body:
-
-    ```{ name: "eventName" }```
-
-4. To see 10 closest events, POST request to /event/findNearest (not yet working) with the following body:
-
-    ```{ location: { latitude, longitude } }```
+## GET 10 SOONEST EVENTS
+4. **To see 10 soonest events**, *GET* request to */event/findNearest*
 
 
 # PROMPT
