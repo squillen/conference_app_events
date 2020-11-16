@@ -13,7 +13,7 @@
 3. ```npm run dev```
 
 
-# CRUD
+# CRU~~D~~
 
 ## CREATE
 1. **To *create* an event**, *POST* request to */event/create*. Example body:
@@ -53,7 +53,45 @@
     ```
 
 ## UPDATE SPONSORS
-2. **To *update* an event's sponsors**, *PATCH* request to */event/updateSponsors*. Example body:
+2. **To *update* an event, *PATCH* request to */event/update/:id*, where :id is the event's unique id. Your body *must be* in an "update" object:
+
+```
+    {
+        "update": {
+            "name": "Super Awesome Event!!!!!",
+            "eventDate": "12/15/2030",
+            "presentations": {
+                "maxPresentations": 10,
+                "presentationLength": 45
+            },
+            "sponsors": [
+                {
+                    "name": "Gaudy",
+                    "cost": 14500,
+                    "freeBadges": 10
+                },
+                {
+                    "name": "Gold",
+                    "cost": 9000,
+                    "freeBadges": 70
+                },
+                {
+                    "name": "Bronze",
+                    "cost": 4500,
+                    "freeBadges": 5
+                }
+            ],
+            "locationID": "50e4d444-0039-4446-aa38-a7dab34d7ca2",
+            "attendanceCost": 350,
+            "vendors": {
+                "availableBooths": 7,
+                "boothCost": 2000
+            }
+        }
+    }
+```
+
+2. **To *update* just an event's sponsors**, *PATCH* request to */event/updateSponsors*. Example body:
 
 ```
     {
