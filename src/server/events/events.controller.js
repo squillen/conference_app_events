@@ -60,14 +60,20 @@ async function calculateExpectedRevenue (event = {}) {
   expectedRevenue += (vendors.availableBooths * vendors.boothCost)
 
   // handle general admission
-  const generalAdmission = Number(maxRoomsOccupancy) - freeBadges
-  expectedRevenue += generalAdmission * attendanceCost
+  const generalAttendance = Number(maxRoomsOccupancy) - freeBadges
+  const error = `
+    This location can only allow for ${maxRoomsOccupancy} and you are currently
+    giving away ${freeBadges} free badges, thus there is no more room for general admissions.
+    Please reconfigure
+  `
+  if (generalAttendance < 0) return { error }
+  expectedRevenue += generalAttendance * attendanceCost
 
   if (expectedRevenue < 0) {
     return { error: 'The event as configured is not expected to make any money! Retool your pricing.' }
   }
 
-  return { expectedRevenue }
+  return { expectedRevenue, generalAttendance }
 }
 
 async function validateInput (event) {
@@ -121,7 +127,7 @@ async function validateInput (event) {
   } else errors.missingPresentations = "Please include a 'presentations' object containing the maxPresentations and expected presentationLength"
 
   // REVENUE CHECK
-  const { error } = await calculateExpectedRevenue(event)
+  const { error, generalAttendance } = await calculateExpectedRevenue(event)
   if (error) errors.expectedRevenue = error
 
   // DATE CHECKS
@@ -136,7 +142,7 @@ async function validateInput (event) {
     }
   }
 
-  return { errors }
+  return { errors, generalAttendance }
 }
 
 function checkSponsorValidity (sponsors) {
@@ -156,7 +162,7 @@ module.exports = class EventController {
       const { name } = req.body
 
       // check input for errors
-      const { errors } = await validateInput(req.body)
+      const { errors, generalAttendance } = await validateInput(req.body)
       if (Object.keys(errors).length > 0) {
         res.status(400).json(errors)
         return
@@ -164,7 +170,7 @@ module.exports = class EventController {
 
       // passed all tests, make into event
       const eventDate = formatEventDate(req.body.eventDate)
-      const eventInfo = { ...req.body, eventDate }
+      const eventInfo = { ...req.body, eventDate, generalAttendance }
 
       const insertResult = await EventsDAO.createNewEvent(eventInfo)
       if (insertResult.error) errors.creationError = insertResult.error
