@@ -6,7 +6,7 @@ function connect (queue) {
   amqp.connect('amqp://localhost', function (err, conn) {
     if (err) {
       console.error('::: AMQP ERROR :::', err.message)
-      return setTimeout(connect, 1000) // try again
+      return setTimeout(() => connect(queue), 1000) // try again
     }
     conn.on('error', function (err) {
       if (err.message !== 'Connection closing') {
@@ -15,7 +15,7 @@ function connect (queue) {
     })
     conn.on('close', function () {
       console.error('::: AMQP RECONNECTING :::')
-      return setTimeout(connect, 1000) // try again
+      return setTimeout(() => connect(queue), 1000) // try again
     })
 
     console.log('::: AMQP CONNECTED! :::')
