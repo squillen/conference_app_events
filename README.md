@@ -22,6 +22,10 @@
         {
             "name": "Super Awesome Event",
             "eventDate": "12/15/2022",
+            "presentations": {
+                "maxPresentations": 10,
+                "presentationLength": 45
+            },
             "sponsors": [
                 {
                     "name": "Platinum",
@@ -56,17 +60,17 @@
         "name": "Super Awesome Event",
         "sponsors": [
             {
-                "name": "Platinum",
-                "cost": 15000,
-                "freeBadges": 15
+                "name": "Super Platinum",
+                "cost": 25000,
+                "freeBadges": 4
             },
             {
-                "name": "Gold",
+                "name": "Platinum",
                 "cost": 10,
                 "freeBadges": 15
             },
             {
-                "name": "Bronze",
+                "name": "Gold",
                 "cost": 4500,
                 "freeBadges": 5
             }
