@@ -4,7 +4,6 @@ function getOptions (method = 'get') {
   return {
     headers: {
       'Content-Type': 'application/json',
-      issuer: 'guest',
       accept: 'application/json',
     },
     method,
