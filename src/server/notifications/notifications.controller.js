@@ -4,7 +4,7 @@ module.exports = class NotificationsController {
   static async eventCreated (req, res) {
     const { event } = req.body
     try {
-      publishMessage(`Event "${event.name}" CREATED ::: ${JSON.stringify(event)}`, 'event.create')
+      publishMessage(`EVENT CREATED ::: ${JSON.stringify(event)}`, 'event.create')
       return res.json({ success: 'notified of event creation' })
     } catch (error) {
       console.error(`::: Failed to notify of ${event.name} creation :::`, error)
@@ -15,7 +15,7 @@ module.exports = class NotificationsController {
   static async eventUpdated (req, res) {
     const { event } = req.body
     try {
-      publishMessage(`Event "${event.name}" UPDATED ::: ${JSON.stringify(event)}`, 'event.modify')
+      publishMessage(`EVENT UPDATED ::: ${JSON.stringify(event)}`, 'event.modify')
       return res.json({ success: 'notified of event update' })
     } catch (error) {
       console.error(`::: Failed to notify of ${event.name} update :::`, error)

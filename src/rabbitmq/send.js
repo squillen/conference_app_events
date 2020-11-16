@@ -101,7 +101,7 @@ function startWorker (queue) {
 }
 
 function work (msg, cb) {
-  console.log('Got msg', msg.content.toString())
+  console.log(msg.content.toString())
   cb(true)
 }
 
