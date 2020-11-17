@@ -144,7 +144,6 @@ async function validateInput (event, updating) {
 
   // DATE CHECKS
   const eventDateString = eventDate.toString()
-  console.log("eventDateString.toString().split('T').length :>> ", eventDateString.toString().split('T').length);
   if (!eventDateString) errors.missingEventDate = 'Events must have a date in the format MM/DD/YYYY'
   else if (eventDateString && eventDateString.split('T') && eventDateString.toString().split('T').length < 2) {
     const year = eventDateString.split('/')[2]
@@ -165,6 +164,8 @@ function checkSponsorValidity (sponsors) {
   for (let i = 0; i < sponsors.length; i++) {
     const sponsor = sponsors[i]
     if (sponsorsCheck[sponsor.name]) return 'Your sponsors list has duplicate sponsor types'
+    if (!sponsor.freeBadges) return 'Your sponsor must have a freeBadges amount'
+    if (!sponsor.cost) return 'Your sponsor must have a cost'
     sponsorsCheck[sponsor.name] = sponsor.name
   }
   return false
