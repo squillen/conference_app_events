@@ -196,6 +196,7 @@ module.exports = class EventController {
         res.status(400).json(errors)
         return
       }
+      sendEventNotification(savedEvent, 'eventCreated')
       return res.json({ ...savedEvent })
     } catch (e) {
       res.status(500).json({ error: e })
