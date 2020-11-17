@@ -11,6 +11,7 @@
 ```
 
 3. ```npm run dev```
+4. To run locally, you must also have at least one location in set up in your database. Refer to [the following repo](https://github.com/elderbas/hr_ms_o_conference_locations) for instructions on doing so.
 
 
 # CRU~~D~~
