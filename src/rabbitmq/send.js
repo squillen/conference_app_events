@@ -1,12 +1,13 @@
 // code leveraged from https://www.cloudamqp.com/blog/2015-05-19-part2-2-rabbitmq-for-beginners_example-and-sample-code-node-js.html
 const amqp = require('amqplib/callback_api')
+const RABBIT_HOST = process.env.RABBIT_HOST || 'localhost'
 let amqpConn = null
 
-function connect (queue) {
-  amqp.connect('amqp://localhost', function (err, conn) {
+function connectToRabbit (queue) {
+  amqp.connect(`amqp://${RABBIT_HOST}`, function (err, conn) {
     if (err) {
       console.error('::: AMQP ERROR :::', err.message)
-      return setTimeout(() => connect(queue), 1000) // try again
+      return setTimeout(() => connectToRabbit(queue), 1000) // try again
     }
     conn.on('error', function (err) {
       if (err.message !== 'Connection closing') {
@@ -15,7 +16,7 @@ function connect (queue) {
     })
     conn.on('close', function () {
       console.error('::: AMQP RECONNECTING :::')
-      return setTimeout(() => connect(queue), 1000) // try again
+      return setTimeout(() => connectToRabbit(queue), 1000) // try again
     })
 
     console.log('::: AMQP CONNECTED! :::')
@@ -118,7 +119,4 @@ function publishMessage (message, routingKey = 'event.create') {
   return publish('', routingKey, Buffer.from(message))
 }
 
-connect('event.create')
-connect('event.modify')
-
-module.exports = { publishMessage }
+module.exports = { publishMessage, connectToRabbit }

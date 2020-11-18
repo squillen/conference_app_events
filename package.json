@@ -5,11 +5,11 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/db/index.js",
-    "db": "nodemon src/db/index.js --watch server --watch",
+    "start": "node src/index.js",
+    "server": "nodemon src/index.js --watch server --watch",
     "rabbitSend": "nodemon src/rabbitmq/send",
     "rabbitListen": "nodemon src/rabbitmq/listen",
-    "dev": "concurrently \"npm run db\" \"npm run rabbitSend\" \"npm run rabbitListen\""
+    "dev": "concurrently \"npm run server\""
   },
   "repository": {
     "type": "git",
