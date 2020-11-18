@@ -81,11 +81,10 @@ function startWorker (queue) {
       console.log('::: AMQP ERROR ::: channel closed')
     })
     ch.prefetch(10)
-    ch.assertExchange('logs', 'fanout', { durable: false })
-    ch.assertQueue(queue, { durable: true }, function (err, res) {
+    ch.assertExchange(queue, 'fanout', { durable: false }, function (err, res) {
       if (closeOnErr(err)) return
       ch.consume(queue, processMsg, { noAck: false })
-      console.log(`::: AMQP WORKER STARTED FOR QUEUE ${queue} :::`)
+      console.log(`::: AMQP EXCHANGE WORKER STARTED FOR QUEUE ${queue} :::`)
     })
 
     function processMsg (msg) {
