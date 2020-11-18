@@ -54,14 +54,16 @@ function startPublisher () {
 // method to publish a message, will queue messages internally if the connection is down and resend later
 function publish (exchange, routingKey, content) {
   try {
-    pubChannel.publish(exchange, routingKey, content, { persistent: true },
+    return pubChannel.publish(exchange, routingKey, content, { persistent: true },
       function (err, ok) {
         if (err) {
           console.error('::: AMQP PUBLISH ERROR :::', err)
           offlinePubQueue.push([exchange, routingKey, content])
           pubChannel.connection.close()
+          return { error: 'Unable to publish' }
         } else if (ok) {
           console.log('MESSAGE PUBLISHED')
+          return { success: 'Message published' }
         }
       })
   } catch (e) {
@@ -113,7 +115,7 @@ function closeOnErr (err) {
 }
 
 function publishMessage (message, routingKey = 'event.create') {
-  publish('', routingKey, Buffer.from(message))
+  return publish('', routingKey, Buffer.from(message))
 }
 
 connect('event.create')
