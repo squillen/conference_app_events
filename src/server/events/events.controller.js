@@ -1,5 +1,12 @@
 const EventsDAO = require('../../db/dao/eventsDAO')
+const CircuitBreaker = require('opossum')
 const { getLocationDetails, sendEventNotification } = require('../utils/requests')
+
+const options = {
+  timeout: 3000, // If our function takes longer than 3 seconds, trigger a failure
+  errorThresholdPercentage: 50, // When 50% of requests fail, trip the circuit
+  resetTimeout: 5000, // After 30 seconds, try again.
+}
 
 class Event {
   constructor ({ attendanceCost, name, locationID, sponsors, vendors } = {}) {
@@ -40,7 +47,7 @@ async function calculateExpectedRevenue (event = {}) {
     locationDetails = await getLocationDetails(event.locationID)
     if (!locationDetails) return { error: 'No location found with that ID' }
 
-    maxRoomsOccupancy = locationDetails.rooms.reduce((num, room) => {
+    maxRoomsOccupancy = locationDetails && locationDetails.rooms && locationDetails.rooms.reduce((num, room) => {
       return num + Number(room.maximumOccupancyNum)
     }, 0)
   } catch (e) {
@@ -108,17 +115,17 @@ async function validateInput (event, updating) {
   if (!locationID) errors.missingLocationID = 'Events must have a locationID'
   else {
     try {
-      const locationDetails = await getLocationDetails(locationID)
+      const breaker = new CircuitBreaker(getLocationDetails, options)
+      const locationDetails = await breaker.fire(locationID)
+      console.log('LOCATION DETAILS :>> ', locationDetails)
       if (!locationDetails) {
         errors.wrongLocationID = 'There is no location with that ID. Please review and try again.'
-      } else {
-        if (vendors) {
-          const totalAllowedVendors = locationDetails.mezzanineAreas.reduce((total, area) => {
-            return area.maxNumPossibleBoothSpaces + total
-          }, 0)
-          if (vendors.availableBooths > totalAllowedVendors) {
-            errors.vendorError = `This location only allows for ${totalAllowedVendors} total vendors. Please reduce the number of vendors.`
-          }
+      } else if (vendors && locationDetails && locationDetails.mezzanineAreas) {
+        const totalAllowedVendors = locationDetails.mezzanineAreas.reduce((total, area) => {
+          return area.maxNumPossibleBoothSpaces + total
+        }, 0)
+        if (vendors.availableBooths > totalAllowedVendors) {
+          errors.vendorError = `This location only allows for ${totalAllowedVendors} total vendors. Please reduce the number of vendors.`
         }
       }
     } catch (e) {
