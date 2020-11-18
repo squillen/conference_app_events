@@ -139,7 +139,6 @@ async function validateInput (event, updating) {
   else {
     try {
       const locationDetails = await handleLocation(locationID)
-      console.log('LOCATION DETAILS :>> ', locationDetails)
       if (!locationDetails) {
         errors.wrongLocationID = 'There is no location with that ID. Please review and try again.'
       } else if (vendors && locationDetails && locationDetails.mezzanineAreas) {

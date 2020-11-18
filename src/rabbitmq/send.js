@@ -3,11 +3,11 @@ const amqp = require('amqplib/callback_api')
 const RABBIT_HOST = process.env.RABBIT_HOST || 'localhost'
 let amqpConn = null
 
-function publishMessagesOnRabbitMQ (queue) {
+function createRabbitMQChannels (queue, cb = () => {}) {
   amqp.connect(`amqp://${RABBIT_HOST}`, function (err, conn) {
     if (err) {
       console.error('::: AMQP ERROR :::', err.message)
-      return setTimeout(() => publishMessagesOnRabbitMQ(queue), 1000) // try again
+      return setTimeout(() => createRabbitMQChannels(queue, cb), 1000) // try again
     }
     conn.on('error', function (err) {
       if (err.message !== 'Connection closing') {
@@ -16,19 +16,19 @@ function publishMessagesOnRabbitMQ (queue) {
     })
     conn.on('close', function () {
       console.error('::: AMQP RECONNECTING :::')
-      return setTimeout(() => publishMessagesOnRabbitMQ(queue), 1000) // try again
+      return setTimeout(() => createRabbitMQChannels(queue, cb), 1000) // try again
     })
 
     console.log(`::: AMQP CONNECTED TO QUEUE: ${queue} :::`)
     amqpConn = conn
 
-    whenConnected(queue)
+    whenConnected(queue, cb)
   })
 }
 
-function whenConnected (queue) {
+function whenConnected (queue, cb) {
   startPublisher()
-  startWorker(queue)
+  startWorker(queue, cb)
 }
 
 let pubChannel = null
@@ -74,7 +74,7 @@ function publish (exchange, routingKey, content) {
 }
 
 // A worker that acknowledges messages only if processed successfully
-function startWorker (queue) {
+function startWorker (queue, cb) {
   amqpConn.createChannel(function (err, ch) {
     if (closeOnErr(err)) return
     ch.on('error', function (err) {
@@ -94,22 +94,27 @@ function startWorker (queue) {
     //   ch.consume(queue, processMsg, { noAck: false })
     //   console.log(`::: AMQP WORKER STARTED FOR QUEUE ${queue} :::`)
     // })
-    function processMsg (msg) {
-      work(msg, function (ok) {
-        try {
-          if (ok) ch.ack(msg)
-          else ch.reject(msg, true)
-        } catch (e) {
-          closeOnErr(e)
-        }
-      })
+    async function processMsg (msg) {
+      try {
+        const success = work(msg)
+        if (success) ch.ack(msg)
+        else ch.reject(msg, true)
+      } catch (e) {
+        closeOnErr(e)
+      }
+    }
+
+    function work (msg) {
+      try {
+        cb(msg)
+        console.log(msg.content.toString())
+        return true
+      } catch (e) {
+        console.error(e)
+        return false
+      }
     }
   })
-}
-
-function work (msg, cb) {
-  console.log(msg.content.toString())
-  cb(true)
 }
 
 function closeOnErr (err) {
@@ -123,4 +128,4 @@ function publishMessage (message, routingKey) {
   return publish('', routingKey, Buffer.from(message))
 }
 
-module.exports = { publishMessage, publishMessagesOnRabbitMQ }
+module.exports = { publishMessage, createRabbitMQChannels }
