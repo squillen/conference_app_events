@@ -1,4 +1,5 @@
 const EventsDAO = require('../../db/dao/eventsDAO')
+const LocationsDAO = require('../../db/dao/locationsDAO')
 const CircuitBreaker = require('opossum')
 const { getLocationDetails, sendEventNotification } = require('../utils/requests')
 
@@ -8,31 +9,53 @@ const options = {
   resetTimeout: 5000, // After 30 seconds, try again.
 }
 
-class Event {
-  constructor ({ attendanceCost, name, locationID, sponsors, vendors } = {}) {
-    this.name = name
-    this.locationID = locationID
-    this.sponsors = sponsors
-    this.attendanceCost = attendanceCost
-    this.vendors = vendors
-  }
+// class Event {
+//   constructor ({ attendanceCost, name, locationID, sponsors, vendors } = {}) {
+//     this.name = name
+//     this.locationID = locationID
+//     this.sponsors = sponsors
+//     this.attendanceCost = attendanceCost
+//     this.vendors = vendors
+//   }
 
-  toJson () {
-    return {
-      name: this.name,
-      location: this.location,
-      sponsors: this.sponsors,
-      attendanceCost: this.attendanceCost,
-      vendors: this.vendors,
-    }
-  }
-}
+//   toJson () {
+//     return {
+//       name: this.name,
+//       location: this.location,
+//       sponsors: this.sponsors,
+//       attendanceCost: this.attendanceCost,
+//       vendors: this.vendors,
+//     }
+//   }
+// }
 
 function formatEventDate (date = '') {
   const [month, day, year] = date.split('/')
   let dateYear = year
   if (year && year.length === 2) dateYear = `20${year}`
   return new Date(dateYear, month - 1, day)
+}
+
+async function handleLocation (locationID) {
+  try {
+    const callToLocationsDB = new CircuitBreaker(getLocationDetails, options)
+    const callToOurDB = new CircuitBreaker(LocationsDAO.findLocationByID, options)
+    callToOurDB.fallback(Promise.resolve(() => callToLocationsDB.fire(locationID)))
+    const result = await callToOurDB.fire(locationID)
+    if (!result) {
+      try {
+        const callToLocationsDB = new CircuitBreaker(getLocationDetails, options)
+        callToOurDB.fallback(Promise.resolve({ error: 'SERVICES DOWN ::: INSPECT ' }))
+        return await callToLocationsDB.fire(locationID)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    return result
+  } catch (error) {
+    console.error(error)
+    return null
+  }
 }
 
 async function calculateExpectedRevenue (event = {}) {
@@ -44,7 +67,7 @@ async function calculateExpectedRevenue (event = {}) {
 
   // get location details to determine max occupancy
   try {
-    locationDetails = await getLocationDetails(event.locationID)
+    locationDetails = await handleLocation(event.locationID)
     if (!locationDetails) return { error: 'No location found with that ID' }
 
     maxRoomsOccupancy = locationDetails && locationDetails.rooms && locationDetails.rooms.reduce((num, room) => {
@@ -115,8 +138,7 @@ async function validateInput (event, updating) {
   if (!locationID) errors.missingLocationID = 'Events must have a locationID'
   else {
     try {
-      const breaker = new CircuitBreaker(getLocationDetails, options)
-      const locationDetails = await breaker.fire(locationID)
+      const locationDetails = await handleLocation(locationID)
       console.log('LOCATION DETAILS :>> ', locationDetails)
       if (!locationDetails) {
         errors.wrongLocationID = 'There is no location with that ID. Please review and try again.'
