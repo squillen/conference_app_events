@@ -3,11 +3,11 @@ const amqp = require('amqplib/callback_api')
 const RABBIT_HOST = process.env.RABBIT_HOST || 'localhost'
 let amqpConn = null
 
-function connectToRabbit (queue) {
+function publishMessagesOnRabbitMQ (queue) {
   amqp.connect(`amqp://${RABBIT_HOST}`, function (err, conn) {
     if (err) {
       console.error('::: AMQP ERROR :::', err.message)
-      return setTimeout(() => connectToRabbit(queue), 1000) // try again
+      return setTimeout(() => publishMessagesOnRabbitMQ(queue), 1000) // try again
     }
     conn.on('error', function (err) {
       if (err.message !== 'Connection closing') {
@@ -16,10 +16,10 @@ function connectToRabbit (queue) {
     })
     conn.on('close', function () {
       console.error('::: AMQP RECONNECTING :::')
-      return setTimeout(() => connectToRabbit(queue), 1000) // try again
+      return setTimeout(() => publishMessagesOnRabbitMQ(queue), 1000) // try again
     })
 
-    console.log('::: AMQP CONNECTED! :::')
+    console.log(`::: AMQP CONNECTED TO QUEUE: ${queue} :::`)
     amqpConn = conn
 
     whenConnected(queue)
@@ -89,7 +89,11 @@ function startWorker (queue) {
       ch.consume(queue, processMsg, { noAck: false })
       console.log(`::: AMQP EXCHANGE WORKER STARTED FOR QUEUE ${queue} :::`)
     })
-
+    // ch.assertQueue(queue, { durable: true }, function (err, res) {
+    //   if (closeOnErr(err)) return
+    //   ch.consume(queue, processMsg, { noAck: false })
+    //   console.log(`::: AMQP WORKER STARTED FOR QUEUE ${queue} :::`)
+    // })
     function processMsg (msg) {
       work(msg, function (ok) {
         try {
@@ -115,8 +119,8 @@ function closeOnErr (err) {
   return true
 }
 
-function publishMessage (message, routingKey = 'event.create') {
+function publishMessage (message, routingKey) {
   return publish('', routingKey, Buffer.from(message))
 }
 
-module.exports = { publishMessage, connectToRabbit }
+module.exports = { publishMessage, publishMessagesOnRabbitMQ }
