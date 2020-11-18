@@ -62,14 +62,14 @@ async function calculateExpectedRevenue (event = {}) {
   // handle general admission
   const generalAttendance = Number(maxRoomsOccupancy) - freeBadges
 
-  if (generalAttendance < 0 && generalAttendance !== 0) {
-    const error = `
-    This location can only allow for ${maxRoomsOccupancy} maximum occupants and you are currently
-    giving away ${freeBadges} free badges, thus there is no more room for general admissions.
-    Please reconfigure
-  `
-    return { error }
-  }
+  // if (generalAttendance < 0 && generalAttendance !== 0) {
+  //   const error = `
+  //   This location can only allow for ${maxRoomsOccupancy} maximum occupants and you are currently
+  //   giving away ${freeBadges} free badges, thus there is no more room for general admissions.
+  //   Please reconfigure
+  // `
+  //   return { error }
+  // }
   expectedRevenue += generalAttendance * attendanceCost
 
   if (expectedRevenue < 0) {
@@ -104,27 +104,27 @@ async function validateInput (event, updating) {
     }
   }
 
-  // LOCATION CHECKS
-  if (!locationID) errors.missingLocationID = 'Events must have a locationID'
-  else {
-    try {
-      const locationDetails = await getLocationDetails(locationID)
-      if (!locationDetails) {
-        errors.wrongLocationID = 'There is no location with that ID. Please review and try again.'
-      } else {
-        if (vendors) {
-          const totalAllowedVendors = locationDetails.mezzanineAreas.reduce((total, area) => {
-            return area.maxNumPossibleBoothSpaces + total
-          }, 0)
-          if (vendors.availableBooths > totalAllowedVendors) {
-            errors.vendorError = `This location only allows for ${totalAllowedVendors} total vendors. Please reduce the number of vendors.`
-          }
-        }
-      }
-    } catch (e) {
-      console.error(e)
-    }
-  }
+  // // LOCATION CHECKS
+  // if (!locationID) errors.missingLocationID = 'Events must have a locationID'
+  // else {
+  //   try {
+  //     const locationDetails = await getLocationDetails(locationID)
+  //     if (!locationDetails) {
+  //       errors.wrongLocationID = 'There is no location with that ID. Please review and try again.'
+  //     } else {
+  //       if (vendors) {
+  //         const totalAllowedVendors = locationDetails.mezzanineAreas.reduce((total, area) => {
+  //           return area.maxNumPossibleBoothSpaces + total
+  //         }, 0)
+  //         if (vendors.availableBooths > totalAllowedVendors) {
+  //           errors.vendorError = `This location only allows for ${totalAllowedVendors} total vendors. Please reduce the number of vendors.`
+  //         }
+  //       }
+  //     }
+  //   } catch (e) {
+  //     console.error(e)
+  //   }
+  // }
 
   // SPONSORS CHECKS
   if (sponsors) {
