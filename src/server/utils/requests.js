@@ -1,12 +1,5 @@
 const axios = require('axios')
-const CircuitBreaker = require('opossum')
 const { handleInternalRequest, getOptions } = require('./helpers')
-
-const options = {
-  timeout: 3000, // If our function takes longer than 3 seconds, trigger a failure
-  errorThresholdPercentage: 20, // When 50% of requests fail, trip the circuit
-  resetTimeout: 10000, // After 30 seconds, try again.
-}
 
 function sendEventNotification (event, type) {
   const path = `/api/notifications/${type}`
@@ -29,13 +22,9 @@ async function requestLocationDetails (locationID) {
 
 async function getLocationDetails (locationID) {
   try {
-    const breaker = new CircuitBreaker(requestLocationDetails, options)
-    breaker.fallback((e) => console.log('Hitting fallback :::', e))
-    const result = await breaker.fire(locationID)
-    console.log('BREAKER RESULT :>> ', result)
-    return result
+    return await requestLocationDetails(locationID)
   } catch (e) {
-    console.error('BREAKER ERROR :::', e)
+    console.error('ERROR WITH LOCATIONS MICROSERVICE:::', e)
     return null
   }
 }
