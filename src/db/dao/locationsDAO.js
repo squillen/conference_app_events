@@ -13,9 +13,9 @@ module.exports = class LocationsDAO {
     }
   }
 
-  static async createNewLocation (eventInfo) {
+  static async insertLocation (location) {
     try {
-      const success = await locations.insertOne(eventInfo, { writeConcern: 2 })
+      const success = await locations.insertOne(location, { writeConcern: 2 })
       return { success }
     } catch (error) {
       console.error(error)
@@ -23,7 +23,7 @@ module.exports = class LocationsDAO {
     }
   }
 
-  static async findAndUpdateLocation (location) {
+  static async updateLocation (location) {
     const { _id } = location
     try {
       return await locations.updateOne(
@@ -32,6 +32,15 @@ module.exports = class LocationsDAO {
       )
     } catch (e) {
       console.error('Error in findAndUpdateLocation()', e)
+      return null
+    }
+  }
+
+  static async findLocationByID (_id) {
+    try {
+      return await locations.findOne({ _id })
+    } catch (e) {
+      console.error('Error in findLocationByID()', e)
       return null
     }
   }

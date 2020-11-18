@@ -1,6 +1,4 @@
 const amqp = require('amqplib/callback_api')
-const { insertLocation, updateLocation } = require('../db/dao/locationsDAO')
-
 const RABBIT_HOST = process.env.RABBIT_HOST || 'localhost'
 
 function listenForLocationEvents (queue, cb) {
@@ -22,7 +20,6 @@ function listenForLocationEvents (queue, cb) {
       console.log(`::: AMQP LISTENING TO QUEUE: ${queue} :::`)
 
       channel.consume(queue, function (msg) {
-        console.log('msg', msg)
         cb(msg)
         channel.ack(msg)
       }, {
@@ -32,5 +29,4 @@ function listenForLocationEvents (queue, cb) {
   })
 }
 
-listenForLocationEvents('location.create', insertLocation)
-listenForLocationEvents('location.modify', updateLocation)
+module.exports = { listenForLocationEvents }
