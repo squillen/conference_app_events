@@ -45,10 +45,11 @@ async function handleLocation (locationID) {
     if (!result) {
       try {
         const callToLocationsDB = new CircuitBreaker(getLocationDetails, options)
-        callToOurDB.fallback(Promise.resolve({ error: 'SERVICES DOWN ::: INSPECT ' }))
+        callToLocationsDB.fallback(Promise.resolve({ error: 'SERVICES DOWN ::: INSPECT ' }))
         return await callToLocationsDB.fire(locationID)
       } catch (error) {
         console.error(error)
+        return null
       }
     }
     return result
