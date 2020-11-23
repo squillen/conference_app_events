@@ -125,7 +125,7 @@ function closeOnErr (err) {
 }
 
 function publishMessage (message, routingKey) {
-  return publish('', routingKey, Buffer.from(message))
+  return publish(routingKey, routingKey, Buffer.from(message))
 }
 
 module.exports = { publishMessage, createRabbitMQChannels }
