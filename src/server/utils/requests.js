@@ -11,7 +11,7 @@ function sendEventNotification (event, type) {
 async function requestLocationDetails (locationID) {
   try {
     const options = getOptions()
-    const url = `http://localhost:9000/api/locations/${locationID}`
+    const url = `${process.env.LOCATIONS_URI}/api/locations/${locationID}`
     const location = await axios.get(url, options)
     return location.data || location
   } catch (e) {
