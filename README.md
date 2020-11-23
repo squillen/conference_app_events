@@ -124,6 +124,12 @@
 4. **To see 10 soonest events**, *GET* request to */event/findNearest*
 
 
+## DOCKER
+To build and run a Docker image:
+2. run ```npm run docker-build```
+3. Once complete, ```npm run docker-run```
+
+
 # PROMPT
 Events
 Depends on: Locations
