@@ -38,14 +38,12 @@ function formatEventDate (date = '') {
 
 async function handleLocation (locationID) {
   try {
-    const callToLocationsDB = new CircuitBreaker(getLocationDetails, options)
     const callToOurDB = new CircuitBreaker(LocationsDAO.findLocationByID, options)
-    callToOurDB.fallback(Promise.resolve(() => callToLocationsDB.fire(locationID)))
     const result = await callToOurDB.fire(locationID)
     if (!result) {
       try {
         const callToLocationsDB = new CircuitBreaker(getLocationDetails, options)
-        callToLocationsDB.fallback(Promise.resolve({ error: 'SERVICES DOWN ::: INSPECT ' }))
+        callToLocationsDB.fallback(Promise.resolve({ error: 'SERVICES DOWN ::: INSPECT' }))
         return await callToLocationsDB.fire(locationID)
       } catch (error) {
         console.error(error)
