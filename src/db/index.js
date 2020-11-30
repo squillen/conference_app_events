@@ -5,7 +5,7 @@ const EventsDAO = require('./dao/eventsDAO')
 const LocationsDAO = require('./dao/locationsDAO')
 
 const mongoURI = process.env.DB_URI || 'mongodb://localhost:27017/events-dev'
-const port = process.env.PORT || 8080
+const port = process.env.PORT || 3000
 
 const client = new MongoClient(mongoURI, {
   useNewUrlParser: true,

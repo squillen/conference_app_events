@@ -11,7 +11,8 @@ function getOptions (method = 'get') {
 }
 
 async function callAPI (path, options) {
-  const host = 'http://localhost:8080'
+  // TODO change this! To what?
+  const host = 'http://localhost:3000'
   const url = host + path
   const method = options.method.toLowerCase() || 'get'
   try {

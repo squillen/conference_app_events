@@ -126,8 +126,23 @@
 
 ## DOCKER
 To build and run a Docker image:
-2. run ```npm run docker-build```
-3. Once complete, ```npm run docker-run```
+1. run ```npm run docker-build```
+2. Once complete, ```npm run docker-run```
+
+
+## KUBERNETES
+
+### RABBIT MQ
+minikube start --vm
+kubectl delete -f kube
+kubectl apply -f kube/namespace.yaml
+kubectl apply -f kube/rbac.yaml
+kubectl config set-context --current --namespace=test-rabbitmq
+kubectl apply -f kube/rabbitmq-headless.yaml
+kubectl create secret generic rabbitmq-admin --from-file=./kube/user --from-file=./kube/pass
+kubectl apply -f kube/configmap.yaml
+kubectl apply -f kube
+kubectl apply -f kube/client-service.yaml
 
 
 # PROMPT

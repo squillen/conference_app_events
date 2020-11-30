@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
     "docker-build": "docker build --tag docker_events .",
-    "docker-run": "docker run --publish 8080:8080 --detach --name de --hostname de docker_events",
+    "docker-run": "docker run --publish 3000:3000 --detach --name de --hostname de docker_events",
     "dev": "nodemon src/index.js --watch server --watch"
   },
   "repository": {

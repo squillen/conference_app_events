@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: events
+  namespace: test-rabbitmq
+spec:
+  selector:
+    app: events
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: LoadBalancer
+
+# ... Deployment YAML definition
+---
+# ... Service YAML definition
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events
+  namespace: test-rabbitmq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: events
+  template:
+    metadata:
+      labels:
+        app: events
+    spec:
+      containers:
+        - name: app
+          image: squillen/events-js:1.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DB_URI
+              value: mongodb+srv://admin:hr-microservices-events@events-microservice.tb5qj.mongodb.net/test?retryWrites=true&w=majority
+            - name: DB_NAME
+              value: development
+            - name: RABBIT_HOST
+              value: http://127.0.0.1:63489
+          imagePullPolicy: Always
